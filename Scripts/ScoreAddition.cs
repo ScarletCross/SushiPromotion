@@ -5,12 +5,18 @@ using UnityEngine.UI;
 
 public class ScoreAddition : MonoBehaviour
 {
-    private int score = 0;
+    public static int score = 0;
+
+   // [SerializeField]
+  //  BallGenerator ballGenerator;
+
+    private int point = BallGenerator.point;
 
     // Start is called before the first frame update
     void Start()
     {
         GetComponent<Text>().text = "得点：" + score.ToString();
+
     }
 
     // Update is called once per frame
@@ -26,5 +32,11 @@ public class ScoreAddition : MonoBehaviour
 
         Debug.Log(point);
     }
+
+    public static int ResultScore()
+    {
+        return score;
+    }
+
 
 }

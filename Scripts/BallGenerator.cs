@@ -9,7 +9,7 @@ public class BallGenerator : MonoBehaviour
     public Sprite[] BallSprites;
 
     public GameObject ScoreText;
-    private int point = 100;
+    public static int point = 100;
     private float magnification = 1.0f;
 
     public GameObject RefreshButton;
@@ -198,7 +198,6 @@ public class BallGenerator : MonoBehaviour
             }
 
             magnification = 1.0f;   // うずしおボタンが押されたときにスコア加算されないようにする
-
 
         }
 

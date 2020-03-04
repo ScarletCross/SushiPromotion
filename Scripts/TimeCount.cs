@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class TimeCount : MonoBehaviour
 {
-    private float time = 60f;
+    public float time = 60f;
 
     [SerializeField]
     BallGenerator ballGenerator;
@@ -32,13 +32,14 @@ public class TimeCount : MonoBehaviour
 
         if (time <= 0)
         {
+            StartCoroutine("ToResult");
             time = 0;
 
             
 
             GetComponent<Text>().text = time.ToString("f2");
 
-            StartCoroutine("ToResult");
+            
 
 
 
@@ -57,7 +58,7 @@ public class TimeCount : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            SceneManager.LoadScene("TitleScene");
+            SceneManager.LoadScene("ResultScene");
         }
 
     }
