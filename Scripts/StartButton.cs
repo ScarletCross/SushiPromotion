@@ -5,7 +5,10 @@ using UnityEngine.SceneManagement;
 
 public class StartButton : MonoBehaviour
 {
-   
+
+    [SerializeField]
+    ButtonSound buttonSound;
+
 
     // Start is called before the first frame update
     void Start()
@@ -19,12 +22,56 @@ public class StartButton : MonoBehaviour
         
     }
 
+    public void GoSelect()
+    {
+
+        StartCoroutine("Interval");
+
+        SceneManager.LoadScene("SelectScene");
+    }
+
+    IEnumerator Interval()
+    {
+        buttonSound.OnDecisionButton();
+        yield return new WaitForSeconds(1.0f);    
+    }
+    
+
+
     public void StartToGame()
     {
         
         int resultScore = ScoreAddition.ResultScore();
         resultScore = 0;
-        SceneManager.LoadScene("GameScene");
+        if (SceneManager.GetActiveScene().name == "ResultScene2")
+        {
+            SceneManager.LoadScene("GameScene2");
+        }
+        else if(SceneManager.GetActiveScene().name == "ResultScene3")
+        {
+            SceneManager.LoadScene("GameScene3");
+        }
+        else
+        {
+            SceneManager.LoadScene("GameScene");
+        }
+        
+    }
+
+    public void StartToGame2()
+    {
+
+        int resultScore = ScoreAddition.ResultScore();
+        resultScore = 0;
+        SceneManager.LoadScene("GameScene2");
+    }
+
+    public void StartToGame3()
+    {
+
+        int resultScore = ScoreAddition.ResultScore();
+        resultScore = 0;
+        SceneManager.LoadScene("GameScene3");
     }
 
     public void BackToTitle()
@@ -35,4 +82,13 @@ public class StartButton : MonoBehaviour
         SceneManager.LoadScene("TitleScene");
     }
 
+    public void ResultToConfig()
+    {
+        SceneManager.LoadScene("ConfigScene");
+    }
+
+    public void ConfigToResult()
+    {
+        SceneManager.LoadScene("ResultScene");
+    }
 }

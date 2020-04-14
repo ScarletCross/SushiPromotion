@@ -6,17 +6,21 @@ using UnityEngine.UI;
 public class TimeUp : MonoBehaviour
 {
     public GameObject TimeUpText;
+    //public GameObject TimeUpFrame;
     
 
     [SerializeField]
     TimeCount timeCount;
 
-    public float endTime = 0f;
+  
+
+    private float endTime;
 
     // Start is called before the first frame update
     void Start()
     {
         TimeUpText.SetActive(false);    // 非表示
+        //TimeUpFrame.SetActive(false);
 
         endTime = timeCount.time;
     }
@@ -27,6 +31,7 @@ public class TimeUp : MonoBehaviour
         if(endTime <= 0)
         {
             TimeUpText.SetActive(true);
+            //TimeUpFrame.SetActive(true);          
         }
     }
 }

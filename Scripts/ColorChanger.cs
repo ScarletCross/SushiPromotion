@@ -11,7 +11,5 @@ public class ColorChanger : MonoBehaviour
 
         //  alpha値を変更
         BallTexture.color = new Color(BallTexture.color.r, BallTexture.color.g, BallTexture.color.b, alpha);
-
-
     }
 }

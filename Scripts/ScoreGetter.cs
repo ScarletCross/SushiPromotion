@@ -12,9 +12,4 @@ public class ScoreGetter : MonoBehaviour
         GetComponent<Text>().text = "得点:" + resultScore.ToString();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

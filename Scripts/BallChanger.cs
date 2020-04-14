@@ -8,6 +8,9 @@ public class BallChanger : MonoBehaviour
     [SerializeField]
     BallGenerator ballGenerator;
 
+    [SerializeField]
+    SoundShot soundShot;
+
     
     public void BallChange()
     {
@@ -19,7 +22,7 @@ public class BallChanger : MonoBehaviour
         {
             Destroy(gameobejct);
         }
-
+        soundShot.Uzusio();
         ballGenerator.SendMessage("DropBall", 50);
 
     }

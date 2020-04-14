@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using System.Collections.Generic;   // リストを使うのに必要
+using System.Collections.Generic;   
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,12 +9,23 @@ public class BallGenerator : MonoBehaviour
     public Sprite[] BallSprites;
 
     public GameObject ScoreText;
-    public static int point = 100;
+    public static int point = 1000;
     private float magnification = 1.0f;
 
     public GameObject RefreshButton;
+   
 
     public bool isPlaying = true;
+
+    private int generateCount = 0;
+
+    private float alpha = 0.5f;
+
+    
+
+    
+
+   
 
 
     private GameObject FirstBall;   //  最初にドラッグしたボールを格納
@@ -25,6 +36,15 @@ public class BallGenerator : MonoBehaviour
 
     [SerializeField]
     ColorChanger colorChanger;
+
+    [SerializeField]
+    UzuTrriger uzuTrriger;
+
+    [SerializeField]
+    SoundShot soundShot;
+
+    [SerializeField]
+    AlphaCheck alphaCheck;
 
   
 
@@ -37,46 +57,37 @@ public class BallGenerator : MonoBehaviour
     void Start()
     {
         StartCoroutine(DropBall(50));   //  コルーチンの実行
-
-   
+        
 
     }
 
     // Update is called once per frame
     void Update()
     {
-
         if (isPlaying)
         {
             if (Input.GetMouseButtonDown(0) && FirstBall == null)
             {
-                OnDragStart();
-            }
-
-            //  クリックし終えたとき
-            else if (Input.GetMouseButtonUp(0))
+                OnDragStart(); 
+            }          
+            else if (Input.GetMouseButtonUp(0))  //  クリックし終えたとき
             {
                 OnDragEnd();
             }
-            //  OnDragStart()実行後
-            else if (FirstBall != null)
+            else if (FirstBall != null)  //  OnDragStart()実行後
             {
                 OnDragging();
             }
         }
-        
-            
-       
-        
-
     }
 
-    IEnumerator DropBall(int count) //　コルーチン
+    IEnumerator DropBall(int count)
     {
 
         if(count == 50)
         {
             StartCoroutine("BindPush");
+            StartCoroutine("UzushioActivate");
         }
 
 
@@ -87,7 +98,8 @@ public class BallGenerator : MonoBehaviour
             //  z軸周りで回転
             GameObject ball = Instantiate(BallPrefab, pos, Quaternion.AngleAxis(Random.Range(-40, 40), Vector3.forward)) as GameObject;
 
-            int spriteID = Random.Range(0, 5);
+            // 難易度調整
+            int spriteID = Random.Range(0, BallSprites.Length);
 
             ball.name = "Fish" + spriteID;
 
@@ -99,13 +111,25 @@ public class BallGenerator : MonoBehaviour
 
     IEnumerator BindPush()
     {
-        RefreshButton.GetComponent<Button>().interactable = false;
+        RefreshButton.GetComponent<Button>().interactable = false;  //  うずしおボタンが使えない状態
         yield return new WaitForSeconds(5.0f);
 
-        RefreshButton.GetComponent<Button>().interactable = true;
-
+        RefreshButton.GetComponent<Button>().interactable = true;   //  うずしおボタンが使える状態
     }
 
+    IEnumerator UzushioActivate() // うずしお効果エフェクトのオン/オフ
+    {
+        //  うずしお効果エフェクトのオン
+        uzuTrriger.uzu.SetActive(true);
+
+        yield return new WaitForSeconds(3.8f);
+
+
+        // うずしお効果エフェクトのオフ
+        uzuTrriger.uzu.SetActive(false);
+    }
+
+    
 
     public void OnDragStart()
     {
@@ -122,7 +146,8 @@ public class BallGenerator : MonoBehaviour
             if (BallName.StartsWith("Fish"))
             {
                 //  それぞれ格納
-                FirstBall = HitObject; 
+                FirstBall = HitObject;
+
                 LastBall = HitObject;
 
                 //  名前を格納
@@ -131,7 +156,7 @@ public class BallGenerator : MonoBehaviour
                 RemovableBallList = new List<GameObject>(); //  削除対象オブジェクトリストの初期化
 
                 PushToList(HitObject);  //  削除対象オブジェクトを格納
-
+                generateCount = 0;
             }
         }
 
@@ -147,16 +172,20 @@ public class BallGenerator : MonoBehaviour
 
 
             //  同じ名前のボールをクリックし、かつ、LastBallとは別オブジェクトの時
-            if(HitObject.name == CurrentBallName && LastBall != HitObject)
+            if(HitObject.name == CurrentBallName && LastBall != HitObject )
             {
                 //  2つのオブジェクトの距離を取得
                 float distance = Vector2.Distance(HitObject.transform.position, LastBall.transform.position);
 
-                if(distance < 1.0f)
+                // alphaCheck.DefaultName();
+
+                if (distance < 1.2f && gameObject.name != "pushed")
                 {
                     //  削除対象オブジェクトとして格納
                     LastBall = HitObject;
-                    PushToList(HitObject);
+                    
+                    PushToList(LastBall);
+                    
                 }
 
             }
@@ -165,36 +194,64 @@ public class BallGenerator : MonoBehaviour
 
     public void OnDragEnd()
     {
+       
         int RemoveCount = RemovableBallList.Count;
 
         if(RemoveCount >= 3)
         {
+
             for(int i = 0; i < RemoveCount; i++)
             {
                 Destroy(RemovableBallList[i]);
-
-                
+                //soundShot.BallDestroySound();
             }
 
-            magnification += (RemoveCount / 10f);
+            magnification += ((RemoveCount / 10f) + (BallSprites.Length / 10f));         
 
-            //  スコア加算
-            ScoreText.SendMessage("AddScore", point * RemoveCount * magnification);
+            if(generateCount == 0)
+            {
+                //  ボールを新たに生成
+                StartCoroutine(DropBall(RemoveCount));
 
-            magnification = 1.0f;
+                //  スコア加算
+                ScoreText.SendMessage("AddScore", point * RemoveCount * magnification);
 
+                magnification = 1.0f;
 
+                
+                generateCount = 1;
 
-            //  ボールを新たに生成
-            StartCoroutine(DropBall(RemoveCount + Random.Range(0, 2)));
+                if(RemoveCount <= 5)
+                {
+                    soundShot.BallDestroySound();
+                }
+                else if(RemoveCount <= 7)
+                {
+                    soundShot.BallDestroyGood();
+                }
+                else if(RemoveCount <= 9)
+                {
+                    soundShot.BallDestroyGreat();
+                }
+                else
+                {
+                    soundShot.BallDestroyPerfect();
+                }
+            }           
         }
         else
         {
             // alpha値を元に戻す
             for(int i = 0; i < RemoveCount; i++)
-            {
-                Debug.Log("reset!");
+            {             
                 colorChanger.ChangeColor(RemovableBallList[i], 1.0f);
+
+                // gameObject.name = CurrentBallName;
+
+             //   ReverseName(CurrentBallName);
+
+               // gameObject.name = alphaCheck.DefaultName();
+                //Debug.Log(gameObject.name);
             }
 
             magnification = 1.0f;   // うずしおボタンが押されたときにスコア加算されないようにする
@@ -212,9 +269,43 @@ public class BallGenerator : MonoBehaviour
 
         // alpha値を半減
         colorChanger.ChangeColor(gameObject, 0.5f);
+        //gameObject.name = "pushed";
+
+        StartCoroutine("NameChanger");
+        
+       // LastBall.tag = "Pushed";
+        soundShot.BallLinkSound();
     }
 
+    IEnumerator NameChanger()
+    {
+        gameObject.name = "pushed";
+        Debug.Log(gameObject.name);
+
+        yield return new WaitForSeconds(0.05f);
+
+        gameObject.name = CurrentBallName;
+        Debug.Log(gameObject.name);
+    }
+
+    public void Dropper()
+    {
+        StartCoroutine(DropBall(50));
+    }
+
+   /* public string DefaultName()
+    {
+        SpriteRenderer spriteObject = gameObject.GetComponent<SpriteRenderer>();
+         
+        Debug.Log(spriteObject.sprite);
+        
+
+        return LastBall.name;
+    }*/
+
+    public void ReverseName(string defaultName)
+    {
+        gameObject.name = CurrentBallName;
+    }
    
-
-
 }
